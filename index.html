@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PubMed Pulse — Evidence Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+  --bg: #f4f4f0;
+  --surface: #ffffff;
+  --surface-alt: #f9f9f6;
+  --border: #e4e4de;
+  --border-light: #ededea;
+  --text: #1c1c1c;
+  --text-secondary: #5a5a52;
+  --text-muted: #8a8a80;
+  --primary: #2b6b4f;
+  --primary-hover: #1f5a40;
+  --primary-light: #e8f5ee;
+  --tier1: #0f7b3f;
+  --tier1-bg: #e6f7ed;
+  --tier2: #1d5faa;
+  --tier2-bg: #e6f0fa;
+  --tier3: #b5700d;
+  --tier3-bg: #fef3e0;
+  --danger: #c0392b;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  --max-w: 900px;
+  --transition: 150ms ease;
+}
+
+html { font-size: 15px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ──────────────────────────────────────── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.logo-text {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-size: 16px;
+}
+.btn-icon:hover { background: var(--surface-alt); border-color: var(--text-muted); }
+
+.key-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  position: absolute;
+  top: -2px;
+  right: -2px;
+}
+.key-indicator.active { background: var(--tier1); }
+
+/* ── Nav Tabs ────────────────────────────────────── */
+.nav-tabs {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-tab {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--text-secondary); }
+.nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* ── Main ────────────────────────────────────────── */
+main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── Buttons ─────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--surface-alt); }
+
+/* ── Search Input ────────────────────────────────── */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 11px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.search-input:focus { border-color: var(--primary); }
+.search-input::placeholder { color: var(--text-muted); }
+
+/* ── Cards ───────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.card-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.card-abstract {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.card-abstract.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.toggle-abstract {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+  margin-top: 10px;
+}
+.card-link:hover { text-decoration: underline; }
+
+/* ── Tier Badges ─────────────────────────────────── */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tier-1 { background: var(--tier1-bg); color: var(--tier1); }
+.tier-2 { background: var(--tier2-bg); color: var(--tier2); }
+.tier-3 { background: var(--tier3-bg); color: var(--tier3); }
+
+/* ── Digest Styles ───────────────────────────────── */
+.digest-intro {
+  margin-bottom: 24px;
+}
+
+.digest-intro p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.digest-section {
+  margin-bottom: 28px;
+}
+
+.digest-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-light);
+  letter-spacing: -0.01em;
+}
+
+.digest-topic-icon {
+  margin-right: 8px;
+}
+
+.digest-bullet {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.digest-bullet.tier-1-border { border-left-color: var(--tier1); }
+.digest-bullet.tier-2-border { border-left-color: var(--tier2); }
+.digest-bullet.tier-3-border { border-left-color: var(--tier3); }
+
+.digest-bullet .tier-badge { margin-right: 6px; vertical-align: middle; }
+.digest-bullet .limitation {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.digest-bullet .takeaway {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* ── AI Summary Box ──────────────────────────────── */
+.ai-summary {
+  background: var(--primary-light);
+  border: 1px solid #c5ddd0;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.ai-summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-summary p, .ai-summary li {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+.ai-summary ul { padding-left: 18px; }
+.ai-summary li { margin-bottom: 6px; }
+
+/* ── Tier Group ──────────────────────────────────── */
+.tier-group {
+  margin-bottom: 28px;
+}
+
+.tier-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.tier-group-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tier-group-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ── Loading ─────────────────────────────────────── */
+.loading-container {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.progress-steps {
+  max-width: 360px;
+  margin: 20px auto 0;
+  text-align: left;
+}
+
+.progress-step {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-step.done { color: var(--tier1); }
+.progress-step.active { color: var(--text); font-weight: 500; }
+.progress-step .check { font-size: 14px; }
+
+/* ── Empty / Error States ────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
+.empty-state p { font-size: 13px; max-width: 400px; margin: 0 auto; }
+
+.error-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--danger);
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ── Modal ───────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.modal .subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-alt);
+  color: var(--text);
+  outline: none;
+}
+.form-group input:focus { border-color: var(--primary); }
+
+.form-group .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.form-group .model-select {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-alt);
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+/* ── Results count ───────────────────────────────── */
+.results-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 640px) {
+  html { font-size: 14px; }
+  main { padding: 16px; }
+  .header-inner { padding: 12px 16px; }
+  .nav-tabs { padding: 0 16px; }
+  .nav-tab { padding: 10px 14px; font-size: 12px; }
+  .search-bar { flex-direction: column; }
+  .card { padding: 18px; }
+  .modal { padding: 20px; margin: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────── -->
+<header class="app-header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">P</div>
+      <div>
+        <span class="logo-text">PubMed Pulse</span>
+        <span class="logo-sub">Evidence Dashboard</span>
+      </div>
+    </a>
+    <div class="header-actions">
+      <button class="btn-icon" id="settings-btn" title="API Settings" style="position:relative;">
+        ⚙
+        <div class="key-indicator" id="key-dot"></div>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Nav ─────────────────────────────────────────── -->
+<nav class="nav-tabs" role="tablist">
+  <button class="nav-tab active" data-view="digest" role="tab">Weekly Digest</button>
+  <button class="nav-tab" data-view="search" role="tab">Search &amp; Fact-Check</button>
+</nav>
+
+<!-- ── Main Content ───────────────────────────────── -->
+<main>
+  <!-- DIGEST VIEW -->
+  <div class="view active" id="view-digest">
+    <div class="digest-intro">
+      <p>Scan the last 7 days of PubMed across your health topics. AI-generated briefing with evidence tiers, limitations, and practical takeaways.</p>
+      <button class="btn btn-primary" id="btn-digest" onclick="loadDigest()">
+        Generate weekly digest
+      </button>
+    </div>
+    <div id="digest-output"></div>
+  </div>
+
+  <!-- SEARCH VIEW -->
+  <div class="view" id="view-search">
+    <div class="search-bar">
+      <input
+        type="text"
+        class="search-input"
+        id="search-input"
+        placeholder="e.g. L-theanine, vitamin D, intermittent fasting, knee pain..."
+        onkeydown="if(event.key==='Enter') performSearch()"
+      >
+      <button class="btn btn-primary" id="btn-search" onclick="performSearch()">Search</button>
+    </div>
+    <div id="search-output"></div>
+  </div>
+</main>
+
+<!-- ── Settings Modal ─────────────────────────────── -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>API Settings</h2>
+    <p class="subtitle">Keys are stored only in your browser's local storage — never sent anywhere except the respective APIs.</p>
+
+    <div class="form-group">
+      <label>OpenAI API Key</label>
+      <input type="password" id="input-openai-key" placeholder="sk-...">
+      <div class="hint">Required for AI summaries. <a href="https://platform.openai.com/api-keys" target="_blank">Get a key</a></div>
+    </div>
+
+    <div class="form-group">
+      <label>NCBI / PubMed API Key</label>
+      <input type="text" id="input-ncbi-key" placeholder="Your NCBI API key">
+      <div class="hint">Optional but recommended. <a href="https://www.ncbi.nlm.nih.gov/account/settings/" target="_blank">Get a key</a></div>
+    </div>
+
+    <div class="form-group">
+      <label>OpenAI Model</label>
+      <select class="model-select" id="input-model">
+        <option value="gpt-4o-mini">gpt-4o-mini (fast, cheap)</option>
+        <option value="gpt-4o">gpt-4o (best quality)</option>
+      </select>
+      <div class="hint">gpt-4o-mini is recommended for daily use — fast and inexpensive.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const PUBMED_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
+
+const TIER_LABELS = {
+  1: { text: 'Tier 1 — Gold Standard', cls: 'tier-1', border: 'tier-1-border', types: ['Systematic Review', 'Meta-Analysis', 'Randomized Controlled Trial'] },
+  2: { text: 'Tier 2 — Strong Evidence', cls: 'tier-2', border: 'tier-2-border', types: ['Clinical Trial', 'Observational Study', 'Comparative Study', 'Clinical Trial, Phase I', 'Clinical Trial, Phase II', 'Clinical Trial, Phase III', 'Clinical Trial, Phase IV', 'Cohort Studies', 'Controlled Clinical Trial', 'Pragmatic Clinical Trial', 'Multicenter Study'] },
+  3: { text: 'Tier 3 — Exploratory', cls: 'tier-3', border: 'tier-3-border', types: [] }
+};
+
+const TIER_FILTERS = {
+  1: '(systematic review[pt] OR meta-analysis[pt] OR randomized controlled trial[pt])',
+  2: '(clinical trial[pt] OR observational study[pt] OR comparative study[pt] OR controlled clinical trial[pt] OR multicenter study[pt] OR pragmatic clinical trial[pt])',
+};
+
+const TOPICS = [
+  { name: 'Nutrition & Diet', icon: '🥗', query: '(dietary supplements OR micronutrients OR gut microbiome OR intermittent fasting OR anti-inflammatory diet OR probiotics OR polyphenols) AND (health OR prevention OR humans[mh])' },
+  { name: 'Physical Activity', icon: '🏃', query: '(exercise OR resistance training OR cardiovascular fitness OR physical activity OR sedentary behavior OR HIIT OR recovery) AND (health OR prevention OR humans[mh])' },
+  { name: 'Longevity & Vitality', icon: '⏳', query: '(aging prevention OR longevity OR sleep quality OR circadian rhythm OR stress resilience OR cognitive decline prevention OR metabolic health) AND (humans[mh])' },
+  { name: 'Disease Prevention', icon: '🛡️', query: '(cardiovascular prevention OR cancer prevention OR diabetes prevention OR immune function OR chronic disease prevention) AND (lifestyle OR diet OR exercise) AND (humans[mh])' },
+  { name: 'Mental Health', icon: '🧠', query: '(depression prevention OR anxiety reduction OR mindfulness OR psychological well-being OR cognitive function) AND (lifestyle OR diet OR exercise OR sleep) AND (humans[mh])' },
+  { name: 'Skin Health', icon: '✨', query: '(skin aging OR photoaging OR collagen OR skin nutrition OR dermatology) AND (diet OR supplement OR prevention OR lifestyle) AND (humans[mh])' },
+  { name: 'Hormonal Balance', icon: '⚖️', query: '(hormonal balance OR testosterone OR estrogen OR thyroid function OR cortisol OR endocrine) AND (diet OR lifestyle OR exercise OR sleep) AND (humans[mh])' },
+];
+
+/* ============================================================
+   STATE & HELPERS
+   ============================================================ */
+function getKey(name) { return localStorage.getItem('pubmed_' + name) || ''; }
+function setKey(name, val) { localStorage.setItem('pubmed_' + name, val); }
+
+function getOpenAIKey() { return getKey('openai_key'); }
+function getNCBIKey() { return getKey('ncbi_key'); }
+function getModel() { return getKey('model') || 'gpt-4o-mini'; }
+
+function updateKeyDot() {
+  const dot = document.getElementById('key-dot');
+  dot.className = 'key-indicator' + (getOpenAIKey() ? ' active' : '');
+}
+
+/* ── Settings Modal ───────────────────────────────── */
+document.getElementById('settings-btn').onclick = () => {
+  document.getElementById('input-openai-key').value = getOpenAIKey();
+  document.getElementById('input-ncbi-key').value = getNCBIKey();
+  document.getElementById('input-model').value = getModel();
+  document.getElementById('settings-modal').classList.add('open');
+};
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function saveSettings() {
+  setKey('openai_key', document.getElementById('input-openai-key').value.trim());
+  setKey('ncbi_key', document.getElementById('input-ncbi-key').value.trim());
+  setKey('model', document.getElementById('input-model').value);
+  updateKeyDot();
+  closeSettings();
+}
+
+document.getElementById('settings-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+
+/* ── Tab Navigation ───────────────────────────────── */
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  };
+});
+
+/* ============================================================
+   PUBMED API
+   ============================================================ */
+async function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function pubmedSearch(query, maxResults = 10, dateFilter = false) {
+  let url = `${PUBMED_BASE}/esearch.fcgi?db=pubmed&retmode=json&retmax=${maxResults}&sort=relevance&term=${encodeURIComponent(query)}`;
+  if (dateFilter) url += '&datetype=edat&reldate=7';
+  const ncbiKey = getNCBIKey();
+  if (ncbiKey) url += `&api_key=${encodeURIComponent(ncbiKey)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.esearchresult?.idlist || [];
+}
+
+async function pubmedFetch(pmids) {
+  if (!pmids.length) return [];
+  let url = `${PUBMED_BASE}/efetch.fcgi?db=pubmed&retmode=xml&rettype=abstract&id=${pmids.join(',')}`;
+  const ncbiKey = getNCBIKey();
+  if (ncbiKey) url += `&api_key=${encodeURIComponent(ncbiKey)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  return parseArticlesXML(text);
+}
+
+function parseArticlesXML(xml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'text/xml');
+  const articles = doc.querySelectorAll('PubmedArticle');
+  const results = [];
+  articles.forEach(art => {
+    const pmid = art.querySelector('PMID')?.textContent || '';
+    const title = art.querySelector('ArticleTitle')?.textContent || 'Untitled';
+    const journal = art.querySelector('Journal Title')?.textContent
+      || art.querySelector('MedlineJournalInfo MedlineTA')?.textContent
+      || art.querySelector('Journal > ISOAbbreviation')?.textContent || '';
+
+    // Get abstract (may have multiple labeled sections)
+    const abstractTexts = art.querySelectorAll('AbstractText');
+    let abstract = '';
+    if (abstractTexts.length > 0) {
+      abstract = Array.from(abstractTexts).map(a => {
+        const label = a.getAttribute('Label');
+        return label ? `${label}: ${a.textContent}` : a.textContent;
+      }).join(' ');
+    }
+
+    // Publication types
+    const ptNodes = art.querySelectorAll('PublicationType');
+    const pubTypes = Array.from(ptNodes).map(n => n.textContent);
+
+    // Date
+    const year = art.querySelector('PubDate Year')?.textContent || '';
+    const month = art.querySelector('PubDate Month')?.textContent || '';
+
+    // Authors
+    const authorNodes = art.querySelectorAll('Author');
+    const authors = Array.from(authorNodes).slice(0, 3).map(a => {
+      const last = a.querySelector('LastName')?.textContent || '';
+      const init = a.querySelector('Initials')?.textContent || '';
+      return `${last} ${init}`;
+    });
+    if (authorNodes.length > 3) authors.push('et al.');
+
+    // Determine tier
+    let tier = 3;
+    for (const pt of pubTypes) {
+      if (TIER_LABELS[1].types.some(t => pt.toLowerCase().includes(t.toLowerCase()))) { tier = 1; break; }
+      if (TIER_LABELS[2].types.some(t => pt.toLowerCase().includes(t.toLowerCase()))) { tier = 2; break; }
+    }
+
+    results.push({ pmid, title, journal, abstract, pubTypes, year, month, authors, tier });
+  });
+  return results;
+}
+
+/* ============================================================
+   OPENAI API
+   ============================================================ */
+async function callOpenAI(systemPrompt, userPrompt) {
+  const key = getOpenAIKey();
+  if (!key) throw new Error('OpenAI API key not set. Click ⚙ to add it.');
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    body: JSON.stringify({
+      model: getModel(),
+      temperature: 0.3,
+      max_tokens: 4000,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `OpenAI API error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+/* ============================================================
+   WEEKLY DIGEST
+   ============================================================ */
+async function loadDigest() {
+  const output = document.getElementById('digest-output');
+  const btn = document.getElementById('btn-digest');
+  btn.disabled = true;
+
+  // Check for key
+  if (!getOpenAIKey()) {
+    output.innerHTML = '<div class="error-box">OpenAI API key required. Click the ⚙ button in the header to add it.</div>';
+    btn.disabled = false;
+    return;
+  }
+
+  // Show loading
+  output.innerHTML = `
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Building your weekly digest...</div>
+      <div class="progress-steps" id="digest-progress"></div>
+    </div>`;
+
+  try {
+    const allArticles = {};
+    const progressEl = document.getElementById('digest-progress');
+
+    // Search each topic
+    for (let i = 0; i < TOPICS.length; i++) {
+      const topic = TOPICS[i];
+      updateProgress(progressEl, TOPICS, i, 'searching');
+
+      // Search Tier 1+2 first (combined), then fallback Tier 3
+      let pmids = await pubmedSearch(
+        `(${topic.query}) AND (${TIER_FILTERS[1]} OR ${TIER_FILTERS[2]})`,
+        8, true
+      );
+
+      // If nothing in T1+T2, try without tier filter (T3 fallback)
+      if (pmids.length === 0) {
+        pmids = await pubmedSearch(topic.query, 6, true);
+      }
+
+      if (pmids.length > 0) {
+        const articles = await pubmedFetch(pmids);
+        allArticles[topic.name] = { icon: topic.icon, articles };
+      } else {
+        allArticles[topic.name] = { icon: topic.icon, articles: [] };
+      }
+
+      await delay(150); // rate-limit courtesy
+    }
+
+    // Count total articles
+    const totalCount = Object.values(allArticles).reduce((s, v) => s + v.articles.length, 0);
+
+    if (totalCount === 0) {
+      output.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <h3>No publications found this week</h3>
+          <p>No relevant studies were indexed in the last 7 days for your topics. Try again later or broaden your topics.</p>
+        </div>`;
+      btn.disabled = false;
+      return;
+    }
+
+    // Build prompt for OpenAI
+    updateProgress(document.getElementById('digest-progress'), TOPICS, TOPICS.length, 'ai');
+
+    const articlesText = Object.entries(allArticles).map(([topic, { articles }]) => {
+      if (articles.length === 0) return `## ${topic}\nNo new studies this week.\n`;
+      const list = articles.map(a =>
+        `- [Tier ${a.tier}] "${a.title}" (${a.journal || 'N/A'})\n  Types: ${a.pubTypes.join(', ')}\n  Abstract: ${a.abstract ? a.abstract.substring(0, 600) : 'No abstract available'}`
+      ).join('\n');
+      return `## ${topic}\n${list}`;
+    }).join('\n\n');
+
+    const systemPrompt = `You are a health-science research analyst creating a weekly digest for a non-specialist reader interested in prevention, vitality, nutrition, exercise, and daily-life health optimization.
+
+Output format: Use HTML. For each topic that has studies, output:
+<h2>[TOPIC ICON] [TOPIC NAME]</h2>
+Then for each notable finding, output a div with class "digest-bullet" and the appropriate tier border class (tier-1-border, tier-2-border, or tier-3-border):
+<div class="digest-bullet [tier-X-border]">
+  <span class="tier-badge tier-X">Tier X</span> [Key finding in plain language, 1-2 sentences]
+  <span class="limitation">Limitation: [main caveat]</span>
+  <span class="takeaway">Takeaway: [practical application]</span>
+</div>
+
+Rules:
+- 2-4 bullet points per topic, only the most notable
+- If a topic had no studies, write a single line: "No notable studies this week."
+- Always state the tier (1, 2, or 3)
+- Always include a limitation and a practical takeaway
+- Use accessible language, no jargon
+- Be balanced and nuanced — don't oversell findings
+- Clearly flag preliminary or small-sample results
+- Use tier-1, tier-2, or tier-3 as CSS classes`;
+
+    const aiResponse = await callOpenAI(systemPrompt, `Here are this week's PubMed abstracts by topic:\n\n${articlesText}`);
+
+    // Render
+    const dateRange = getDateRange();
+    output.innerHTML = `
+      <div class="results-meta">${totalCount} studies found across ${Object.keys(allArticles).length} topics · ${dateRange}</div>
+      <div class="card">${aiResponse}</div>
+    `;
+
+  } catch (err) {
+    output.innerHTML = `<div class="error-box">${escapeHTML(err.message)}</div>`;
+  }
+
+  btn.disabled = false;
+}
+
+function updateProgress(el, topics, current, phase) {
+  if (!el) return;
+  let html = '';
+  for (let i = 0; i < topics.length; i++) {
+    const status = i < current ? 'done' : i === current ? 'active' : '';
+    const icon = i < current ? '✓' : i === current ? '⟳' : '○';
+    html += `<div class="progress-step ${status}"><span class="check">${icon}</span> ${topics[i].icon} ${topics[i].name}</div>`;
+  }
+  if (phase === 'ai') {
+    html += `<div class="progress-step active"><span class="check">⟳</span> 🤖 Generating AI briefing...</div>`;
+  }
+  el.innerHTML = html;
+}
+
+/* ============================================================
+   SEARCH & FACT-CHECK
+   ============================================================ */
+async function performSearch() {
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) return;
+
+  const output = document.getElementById('search-output');
+  const btn = document.getElementById('btn-search');
+  btn.disabled = true;
+
+  if (!getOpenAIKey()) {
+    output.innerHTML = '<div class="error-box">OpenAI API key required. Click the ⚙ button in the header to add it.</div>';
+    btn.disabled = false;
+    return;
+  }
+
+  output.innerHTML = `
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Searching PubMed for "${escapeHTML(query)}"...</div>
+      <div class="progress-steps" id="search-progress">
+        <div class="progress-step active"><span class="check">⟳</span> Searching Tier 1 (Systematic Reviews, RCTs)...</div>
+      </div>
+    </div>`;
+
+  try {
+    const progress = document.getElementById('search-progress');
+    const results = { 1: [], 2: [], 3: [] };
+
+    // Tier 1
+    const t1ids = await pubmedSearch(`(${query}) AND ${TIER_FILTERS[1]} AND humans[mh]`, 10);
+    if (t1ids.length) results[1] = await pubmedFetch(t1ids);
+    results[1].forEach(a => a.tier = 1);
+    await delay(200);
+
+    // Tier 2
+    if (progress) progress.innerHTML = `
+      <div class="progress-step done"><span class="check">✓</span> Tier 1 — ${results[1].length} found</div>
+      <div class="progress-step active"><span class="check">⟳</span> Searching Tier 2 (Clinical Trials, Observational)...</div>`;
+    const t2ids = await pubmedSearch(`(${query}) AND ${TIER_FILTERS[2]} AND humans[mh]`, 10);
+    // Exclude already-found PMIDs
+    const t2unique = t2ids.filter(id => !t1ids.includes(id));
+    if (t2unique.length) results[2] = await pubmedFetch(t2unique);
+    results[2].forEach(a => a.tier = 2);
+    await delay(200);
+
+    // Tier 3 only if T1 + T2 are empty
+    if (results[1].length === 0 && results[2].length === 0) {
+      if (progress) progress.innerHTML = `
+        <div class="progress-step done"><span class="check">✓</span> Tier 1 — 0 found</div>
+        <div class="progress-step done"><span class="check">✓</span> Tier 2 — 0 found</div>
+        <div class="progress-step active"><span class="check">⟳</span> Searching Tier 3 (Exploratory)...</div>`;
+      const t3ids = await pubmedSearch(`(${query}) AND humans[mh]`, 10);
+      if (t3ids.length) results[3] = await pubmedFetch(t3ids);
+      results[3].forEach(a => a.tier = 3);
+      await delay(200);
+    }
+
+    const allArticles = [...results[1], ...results[2], ...results[3]];
+
+    if (allArticles.length === 0) {
+      output.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <h3>No results for "${escapeHTML(query)}"</h3>
+          <p>Try a different term, a synonym, or a broader concept. PubMed uses medical vocabulary — "vitamin C" may work better than "ascorbic acid" or vice versa.</p>
+        </div>`;
+      btn.disabled = false;
+      return;
+    }
+
+    // AI summary
+    if (progress) progress.innerHTML += `<div class="progress-step active"><span class="check">⟳</span> 🤖 Generating AI analysis...</div>`;
+
+    const articlesText = allArticles.map(a =>
+      `[Tier ${a.tier}] "${a.title}" (${a.journal})\nTypes: ${a.pubTypes.join(', ')}\nAbstract: ${a.abstract ? a.abstract.substring(0, 800) : 'No abstract'}\nPMID: ${a.pmid}`
+    ).join('\n\n---\n\n');
+
+    const systemPrompt = `You are a health-science analyst helping a non-specialist fact-check health claims and understand what research says about "${query}".
+
+Provide your response in two HTML sections:
+
+1. A summary section:
+<div class="ai-summary">
+  <div class="ai-summary-label">🤖 Evidence Summary</div>
+  <p>[2-4 sentence overall assessment of the evidence on ${query}. Be balanced. State clearly whether evidence is strong, moderate, limited, or mixed. Note if most evidence is from lower tiers.]</p>
+</div>
+
+2. Then a detailed breakdown as a simple list of findings. For each study:
+<div class="card">
+  <div class="card-header">
+    <h3>[Study title paraphrased as a finding - what did this study show?]</h3>
+    <span class="tier-badge tier-[N]">Tier [N]</span>
+  </div>
+  <div class="card-meta">[Journal] · [Authors abbreviated] · PMID: [number]</div>
+  <div class="card-abstract">[Key finding in 2-3 sentences. Then: "Limitations: ..." in 1 sentence. Then: "Bottom line: ..." in 1 sentence for practical relevance.]</div>
+  <a class="card-link" href="https://pubmed.ncbi.nlm.nih.gov/[PMID]/" target="_blank">View on PubMed →</a>
+</div>
+
+Rules:
+- Group by tier (Tier 1 first, then 2, then 3)
+- Add a tier group header before each group: <div class="tier-group-header"><h2>[Tier label]</h2><span class="tier-group-count">[N] studies</span></div>
+- Always state limitations honestly
+- Don't oversell — if a study is small, say so
+- If evidence is mostly Tier 3, explicitly note this
+- Use accessible, non-jargon language`;
+
+    const aiResponse = await callOpenAI(systemPrompt, `Search term: "${query}"\n\nStudies found:\n\n${articlesText}`);
+
+    output.innerHTML = `
+      <div class="results-meta">${allArticles.length} studies found · Tier 1: ${results[1].length} · Tier 2: ${results[2].length} · Tier 3: ${results[3].length}</div>
+      ${aiResponse}
+    `;
+
+  } catch (err) {
+    output.innerHTML = `<div class="error-box">${escapeHTML(err.message)}</div>`;
+  }
+
+  btn.disabled = false;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function escapeHTML(str) {
+  const el = document.createElement('span');
+  el.textContent = str;
+  return el.innerHTML;
+}
+
+function getDateRange() {
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(weekAgo)} – ${fmt(now)}`;
+}
+
+/* ── Init ─────────────────────────────────────────── */
+updateKeyDot();
+</script>
+</body>
+</html>
