@@ -583,6 +583,140 @@ main {
   margin-bottom: 16px;
 }
 
+/* ── Archive ─────────────────────────────────────── */
+.archive-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.archive-item:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+
+.archive-item-body { flex: 1; min-width: 0; }
+
+.archive-item-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+.archive-type-digest { background: #f0e6fa; color: #6b21a8; }
+.archive-type-search { background: var(--primary-light); color: var(--primary); }
+
+.archive-item h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.archive-item .archive-date {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.archive-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-archive-delete {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all var(--transition);
+}
+.btn-archive-delete:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 12px;
+}
+.btn-save:hover { background: var(--primary-light); color: var(--primary); border-color: #c5ddd0; }
+.btn-save.saved { background: var(--primary-light); color: var(--primary); border-color: #c5ddd0; cursor: default; }
+
+.archive-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-bottom: 18px;
+}
+.archive-back:hover { text-decoration: underline; }
+
+.archive-detail-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.archive-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.archive-filter-btn {
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.archive-filter-btn:hover { border-color: var(--text-muted); }
+.archive-filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+.archive-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 640px) {
   html { font-size: 14px; }
@@ -621,6 +755,7 @@ main {
 <nav class="nav-tabs" role="tablist">
   <button class="nav-tab active" data-view="digest" role="tab">Weekly Digest</button>
   <button class="nav-tab" data-view="search" role="tab">Search &amp; Fact-Check</button>
+  <button class="nav-tab" data-view="archive" role="tab">Archive</button>
 </nav>
 
 <!-- ── Main Content ───────────────────────────────── -->
@@ -649,6 +784,11 @@ main {
       <button class="btn btn-primary" id="btn-search" onclick="performSearch()">Search</button>
     </div>
     <div id="search-output"></div>
+  </div>
+
+  <!-- ARCHIVE VIEW -->
+  <div class="view" id="view-archive">
+    <div id="archive-output"></div>
   </div>
 </main>
 
@@ -962,6 +1102,9 @@ Rules:
 - If a topic had no studies, write a single line: "No notable studies this week."
 - Always state the tier (1, 2, or 3)
 - Always include a limitation and a practical takeaway
+- CRITICAL — Be explicit about direction and magnitude of effects. NEVER use vague verbs like "affected", "impacted", "was associated with", "influenced", "modulated", or "altered" without saying HOW. Always state: did it increase or decrease? Improve or worsen? Help or harm? By how much if data is available? Example — BAD: "Protein supplementation affected skin AGE levels." GOOD: "Protein supplementation reduced skin AGE levels by 12%, suggesting a protective effect against skin aging." If the direction is genuinely unclear from the abstract, say "results were mixed" or "the direction of effect was unclear" — never hide ambiguity behind vague wording.
+- State the sample size (e.g. "in 42 adults" or "across 12 studies") so the reader can gauge weight
+- When mentioning a molecule, compound, or ingredient, always add its 2-3 most common food or natural sources in parentheses on first mention so the reader instantly knows what it is. Example: "Lycopene (found in cooked tomatoes, watermelon, red peppers)..." or "Quercetin (found in onions, apples, berries)..." Do this for vitamins, amino acids, polyphenols, fatty acids, probiotics strains, etc. Skip only for universally known terms like "protein" or "fiber".
 - Use accessible language, no jargon
 - Be balanced and nuanced — don't oversell findings
 - Clearly flag preliminary or small-sample results
@@ -971,10 +1114,21 @@ Rules:
 
     // Render
     const dateRange = getDateRange();
+    const digestId = 'digest_' + Date.now();
     output.innerHTML = `
       <div class="results-meta">${totalCount} studies found across ${Object.keys(allArticles).length} topics · ${dateRange}</div>
       <div class="card">${aiResponse}</div>
+      <button class="btn-save" id="save-${digestId}" onclick="saveDigest('${digestId}', this)">
+        📌 Save to archive
+      </button>
     `;
+    // Store content temporarily for saving
+    window._lastDigest = {
+      id: digestId,
+      dateRange: dateRange,
+      totalCount: totalCount,
+      html: `<div class="results-meta">${totalCount} studies found across ${Object.keys(allArticles).length} topics · ${dateRange}</div><div class="card">${aiResponse}</div>`
+    };
 
   } catch (err) {
     output.innerHTML = `<div class="error-box">${escapeHTML(err.message)}</div>`;
@@ -1100,17 +1254,32 @@ Provide your response in two HTML sections:
 Rules:
 - Group by tier (Tier 1 first, then 2, then 3)
 - Add a tier group header before each group: <div class="tier-group-header"><h2>[Tier label]</h2><span class="tier-group-count">[N] studies</span></div>
+- CRITICAL — Be explicit about direction and magnitude. NEVER use vague verbs like "affected", "impacted", "was associated with", "influenced", "modulated" without saying HOW. Always state: did it increase or decrease? Improve or worsen? Help or harm? By how much (percentages, absolute numbers) when available? Example — BAD: "Protein supplementation affected skin AGE levels." GOOD: "Protein supplementation reduced skin AGE levels by 12%, suggesting a protective effect against skin aging." If direction is unclear, say so explicitly: "results were mixed" or "the direction of effect was unclear."
+- Always include sample size in findings (e.g. "in a trial of 200 adults", "pooling 15 RCTs with 3,400 participants")
 - Always state limitations honestly
 - Don't oversell — if a study is small, say so
 - If evidence is mostly Tier 3, explicitly note this
-- Use accessible, non-jargon language`;
+- When mentioning a molecule, compound, or ingredient, always add its 2-3 most common food or natural sources in parentheses on first mention so the reader instantly knows what it is. Example: "Lycopene (found in cooked tomatoes, watermelon, red peppers)..." or "L-theanine (found in green tea, black tea)..." Do this in the summary and on first mention in the cards. Skip only for universally known terms like "protein" or "fiber".
+- Use accessible, non-jargon language
+- The reader's goal is fact-checking: they want to know "is this actually true and should I act on it?" — answer that directly`;
 
     const aiResponse = await callOpenAI(systemPrompt, `Search term: "${query}"\n\nStudies found:\n\n${articlesText}`);
 
+    const searchId = 'search_' + Date.now();
+    const metaLine = `${allArticles.length} studies found · Tier 1: ${results[1].length} · Tier 2: ${results[2].length} · Tier 3: ${results[3].length}`;
     output.innerHTML = `
-      <div class="results-meta">${allArticles.length} studies found · Tier 1: ${results[1].length} · Tier 2: ${results[2].length} · Tier 3: ${results[3].length}</div>
+      <div class="results-meta">${metaLine}</div>
       ${aiResponse}
+      <button class="btn-save" id="save-${searchId}" onclick="saveSearch('${searchId}', '${escapeHTML(query).replace(/'/g, "\\'")}', this)">
+        📌 Save to archive
+      </button>
     `;
+    window._lastSearch = {
+      id: searchId,
+      query: query,
+      meta: metaLine,
+      html: `<div class="results-meta">${metaLine}</div>${aiResponse}`
+    };
 
   } catch (err) {
     output.innerHTML = `<div class="error-box">${escapeHTML(err.message)}</div>`;
@@ -1135,8 +1304,140 @@ function getDateRange() {
   return `${fmt(weekAgo)} – ${fmt(now)}`;
 }
 
+/* ============================================================
+   ARCHIVE
+   ============================================================ */
+function getArchive() {
+  try { return JSON.parse(localStorage.getItem('pubmed_archive') || '[]'); }
+  catch { return []; }
+}
+
+function setArchive(items) {
+  localStorage.setItem('pubmed_archive', JSON.stringify(items));
+}
+
+function saveDigest(id, btnEl) {
+  if (!window._lastDigest) return;
+  const item = {
+    id: window._lastDigest.id,
+    type: 'digest',
+    title: 'Weekly Digest — ' + window._lastDigest.dateRange,
+    subtitle: window._lastDigest.totalCount + ' studies',
+    date: new Date().toISOString(),
+    html: window._lastDigest.html
+  };
+  const archive = getArchive();
+  archive.unshift(item);
+  setArchive(archive);
+  btnEl.innerHTML = '✓ Saved';
+  btnEl.classList.add('saved');
+  btnEl.onclick = null;
+  updateArchiveBadge();
+}
+
+function saveSearch(id, query, btnEl) {
+  if (!window._lastSearch) return;
+  const item = {
+    id: window._lastSearch.id,
+    type: 'search',
+    title: window._lastSearch.query,
+    subtitle: window._lastSearch.meta,
+    date: new Date().toISOString(),
+    html: window._lastSearch.html
+  };
+  const archive = getArchive();
+  archive.unshift(item);
+  setArchive(archive);
+  btnEl.innerHTML = '✓ Saved';
+  btnEl.classList.add('saved');
+  btnEl.onclick = null;
+  updateArchiveBadge();
+}
+
+function deleteArchiveItem(id, ev) {
+  ev.stopPropagation();
+  if (!confirm('Remove this item from the archive?')) return;
+  const archive = getArchive().filter(a => a.id !== id);
+  setArchive(archive);
+  renderArchiveList();
+  updateArchiveBadge();
+}
+
+function renderArchiveList(filter = 'all') {
+  const output = document.getElementById('archive-output');
+  const archive = getArchive();
+  const filtered = filter === 'all' ? archive : archive.filter(a => a.type === filter);
+
+  if (archive.length === 0) {
+    output.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📂</div>
+        <h3>Archive is empty</h3>
+        <p>Save digests or search results using the 📌 button, and they'll appear here for future reference.</p>
+      </div>`;
+    return;
+  }
+
+  const filterHTML = `
+    <div class="archive-filters">
+      <button class="archive-filter-btn ${filter === 'all' ? 'active' : ''}" onclick="renderArchiveList('all')">All (${archive.length})</button>
+      <button class="archive-filter-btn ${filter === 'digest' ? 'active' : ''}" onclick="renderArchiveList('digest')">Digests (${archive.filter(a => a.type === 'digest').length})</button>
+      <button class="archive-filter-btn ${filter === 'search' ? 'active' : ''}" onclick="renderArchiveList('search')">Searches (${archive.filter(a => a.type === 'search').length})</button>
+    </div>`;
+
+  if (filtered.length === 0) {
+    output.innerHTML = filterHTML + `<div class="archive-count">No items match this filter.</div>`;
+    return;
+  }
+
+  const listHTML = filtered.map(item => {
+    const d = new Date(item.date);
+    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const typeClass = item.type === 'digest' ? 'archive-type-digest' : 'archive-type-search';
+    const typeLabel = item.type === 'digest' ? '📊 Digest' : '🔍 Search';
+    return `
+      <div class="archive-item" onclick="viewArchiveItem('${item.id}')">
+        <div class="archive-item-body">
+          <div class="archive-item-type ${typeClass}">${typeLabel}</div>
+          <h3>${escapeHTML(item.title)}</h3>
+          <div class="archive-date">${dateStr} · ${escapeHTML(item.subtitle || '')}</div>
+        </div>
+        <div class="archive-item-actions">
+          <button class="btn-archive-delete" onclick="deleteArchiveItem('${item.id}', event)" title="Delete">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  output.innerHTML = filterHTML + `<div class="archive-count">${filtered.length} item${filtered.length > 1 ? 's' : ''}</div>` + listHTML;
+}
+
+function viewArchiveItem(id) {
+  const archive = getArchive();
+  const item = archive.find(a => a.id === id);
+  if (!item) return;
+
+  const output = document.getElementById('archive-output');
+  const d = new Date(item.date);
+  const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const typeLabel = item.type === 'digest' ? '📊 Weekly Digest' : '🔍 Search';
+
+  output.innerHTML = `
+    <button class="archive-back" onclick="renderArchiveList()">← Back to archive</button>
+    <div class="archive-detail-meta">${typeLabel} · Saved ${dateStr}</div>
+    <h2 style="font-size:18px; font-weight:700; margin-bottom:20px; letter-spacing:-0.01em;">${escapeHTML(item.title)}</h2>
+    ${item.html}
+  `;
+}
+
+function updateArchiveBadge() {
+  // Optional: could add a badge count to the Archive tab
+}
+
 /* ── Init ─────────────────────────────────────────── */
 updateKeyDot();
+
+// Render archive when tab is clicked
+document.querySelector('[data-view="archive"]').addEventListener('click', () => renderArchiveList());
 </script>
 </body>
 </html>
