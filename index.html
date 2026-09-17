@@ -1005,7 +1005,10 @@ async function callOpenAI(systemPrompt, userPrompt) {
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
+  let content = data.choices?.[0]?.message?.content || '';
+  // Strip markdown code fences that OpenAI sometimes wraps around HTML
+  content = content.replace(/^```(?:html)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+  return content;
 }
 
 /* ============================================================
